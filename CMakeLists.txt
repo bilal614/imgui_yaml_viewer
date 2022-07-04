@@ -47,4 +47,21 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         ${OPENGL_LIBRARIES}
         ${GLFW3_LIBRARIES}
     )
+
+    add_executable(simple_image_viewer 
+        ${PROJECT_SOURCE_DIR}/src/GlfwBackendBinding.cpp
+    )
+
+    target_include_directories(simple_image_viewer PUBLIC
+        ${PROJECT_SOURCE_DIR}/include 
+        ${PROJECT_SOURCE_DIR}/imgui
+        ${PROJECT_SOURCE_DIR}/imgui/backends
+    )
+
+    target_link_libraries(simple_image_viewer
+        imgui_glfw_opengl
+        ${OPENGL_LIBRARIES}
+        ${GLFW3_LIBRARIES}
+    )
+
 endif()
