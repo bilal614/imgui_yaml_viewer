@@ -1,0 +1,10 @@
+
+namespace YamlViewer
+{
+
+class IYamlEditView
+{
+
+};
+
+}

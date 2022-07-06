@@ -27,6 +27,7 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         ${PROJECT_SOURCE_DIR}/imgui/imgui_widgets.cpp
         ${PROJECT_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
         ${PROJECT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp
+        ${PROJECT_SOURCE_DIR}/imgui/misc/cpp/imgui_stdlib.cpp
     )
 
     target_include_directories(imgui_glfw_opengl PRIVATE 
@@ -46,10 +47,15 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         imgui_glfw_opengl
         ${OPENGL_LIBRARIES}
         ${GLFW3_LIBRARIES}
+        ${CMAKE_DL_LIBS} #link to dl lib for dynamic loading
+        -lX11 #In some cases need to explicitly link to x11 lib, needed by glfw3
+        -pthread 
     )
 
     add_executable(simple_image_viewer 
         ${PROJECT_SOURCE_DIR}/src/GlfwBackendBinding.cpp
+        ${PROJECT_SOURCE_DIR}/src/YamlEditView.cpp
+        ${PROJECT_SOURCE_DIR}/src/main.cpp
     )
 
     target_include_directories(simple_image_viewer PUBLIC
@@ -62,6 +68,9 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         imgui_glfw_opengl
         ${OPENGL_LIBRARIES}
         ${GLFW3_LIBRARIES}
+        ${CMAKE_DL_LIBS} #link to dl lib for dynamic loading
+        -lX11 #In some cases need to explicitly link to x11 lib, needed by glfw3
+        -pthread
     )
 
 endif()
