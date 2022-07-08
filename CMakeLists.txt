@@ -12,8 +12,16 @@ find_package(glfw3 3.3 REQUIRED)
 
 pkg_check_modules(GLFW3 REQUIRED glfw3)
 
-if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
+add_subdirectory(${PROJECT_SOURCE_DIR}/yaml-cpp)
 
+get_property(propVal TARGET yaml-cpp PROPERTY INCLUDE_DIRECTORIES)
+
+if (propVal)
+    message("${target}-INCLUDE_DIRECTORIES:   ${propVal}")
+endif()
+
+if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
+    
     include_directories(
         ${OPENGL_INCLUDE_DIRS}
         ${GLFW3_INCLUDE_DIRS}
@@ -62,6 +70,7 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         ${PROJECT_SOURCE_DIR}/include 
         ${PROJECT_SOURCE_DIR}/imgui
         ${PROJECT_SOURCE_DIR}/imgui/backends
+        $<TARGET_PROPERTY:yaml-cpp,INCLUDE_DIRECTORIES>
     )
 
     target_link_libraries(simple_image_viewer
@@ -71,6 +80,7 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         ${CMAKE_DL_LIBS} #link to dl lib for dynamic loading
         -lX11 #In some cases need to explicitly link to x11 lib, needed by glfw3
         -pthread
+        yaml-cpp
     )
 
 endif()

@@ -1,6 +1,8 @@
 #include "YamlEditView.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
+
+#include "yaml-cpp/yaml.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -18,38 +20,32 @@ struct YamlEditView::Impl
     Impl();
     ~Impl() = default;
 
-    void updateYamlText();
     ImGuiWindowFlags windowFlags;
     ImGuiInputTextFlags inputTextFlags;
     ImGuiInputTextCallback editViewCallback;
     std::unique_ptr<ImGuiInputTextCallbackData> callBackContextData;
-    std::string yamlText;
+    std::string yamlTextBuffer;
 };
 
 YamlEditView::Impl::Impl() :
-    windowFlags{0},
-    inputTextFlags{ImGuiInputTextFlags_AllowTabInput },
+    windowFlags{ImGuiWindowFlags_NoMove },
+    inputTextFlags{ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CallbackEdit },
     editViewCallback{},
     callBackContextData{std::make_unique<ImGuiInputTextCallbackData>()},
-    yamlText{}
+    yamlTextBuffer{}
 {
+    callBackContextData->UserData = this;
     editViewCallback = [](ImGuiInputTextCallbackData* data) ->int
     {
         //TODO put implementation here
+        std::stringstream ss{data->Buf};
+        static_cast<YamlEditView::Impl*>(data->UserData)->yamlTextBuffer = ss.str();
+        YAML::Parser yamlParser;
+        yamlParser.Load(ss);
+        yamlParser.PrintTokens(std::cout);
         return 0;
     };
 
-    if (!ImGui::Begin("Dear ImGui Demo", NULL, windowFlags))
-    {
-        // Early out if the window is collapsed, as an optimization.
-        ImGui::End();
-    }
-    else
-    {
-        //ImGui::InputTextMultiline("##source", yamlText.data(), yamlText.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), inputTextFlags, editViewCallback, callBackContextData.get());
-        ImGui::InputTextMultiline("##source", &yamlText, ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), inputTextFlags, editViewCallback, callBackContextData.get());
-        ImGui::End();
-    }
 }
 
 YamlEditView::YamlEditView() : 
@@ -60,6 +56,19 @@ YamlEditView::YamlEditView() :
 
 YamlEditView::~YamlEditView() = default;
 
+void YamlEditView::show()
+{
+    if (!ImGui::Begin("Yaml Editor", NULL, p->windowFlags))
+    {
+        // Early out if the window is collapsed, as an optimization.
+        ImGui::End();
+    }
+    else
+    {
+        ImGui::InputTextMultiline("##source", &p->yamlTextBuffer, ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 32), p->inputTextFlags, p->editViewCallback, p->callBackContextData.get());
+        ImGui::End();
+    }
+}
 
 
 }
