@@ -44,7 +44,7 @@ GlfwBackendBinding::Impl::~Impl()
 
 GlfwBackendBinding::Impl::Impl() :
     glShaderLanguageVersion{"#version 130"},
-    yamlEditView{ std::make_unique<YamlEditView>()}
+    yamlEditView{ }
 {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -52,15 +52,17 @@ GlfwBackendBinding::Impl::Impl() :
         std::cout << "glfwInit failed" << std::endl;
     }
 
-    // GL 3.0 + GLSL 130
+    // GL 3.3 + GLSL 130
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    auto screenWidth = glfwGetVideoMode(primaryMonitor)->width;
+    auto screenHeight = glfwGetVideoMode(primaryMonitor)->height;
     // Create window with graphics context
-    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    window = glfwCreateWindow(screenWidth, screenHeight, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
     if (window != NULL)
     {
-    
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
 
@@ -72,13 +74,15 @@ GlfwBackendBinding::Impl::Impl() :
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
         // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
+        //ImGui::StyleColorsDark();
+        ImGui::StyleColorsClassic();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glShaderLanguageVersion.c_str());
     }
+
+    yamlEditView = std::make_unique<YamlEditView>(screenWidth, screenHeight);
 
 }
 

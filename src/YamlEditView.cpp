@@ -17,9 +17,12 @@ void onUserInputRecieved(std::vector<char>& yamlText, char* textBuffer, int bufT
 
 struct YamlEditView::Impl
 {
-    Impl();
+    Impl(unsigned short width, unsigned short height);
     ~Impl() = default;
 
+    void traverseYamlNode(const YAML::Node& yamlNode);
+
+    unsigned short viewWidth, viewHeight;
     ImGuiWindowFlags windowFlags;
     ImGuiInputTextFlags inputTextFlags;
     ImGuiInputTextCallback editViewCallback;
@@ -27,7 +30,9 @@ struct YamlEditView::Impl
     std::string yamlTextBuffer;
 };
 
-YamlEditView::Impl::Impl() :
+YamlEditView::Impl::Impl(unsigned short width, unsigned short height) :
+    viewWidth{width},
+    viewHeight{height},
     windowFlags{ImGuiWindowFlags_NoMove },
     inputTextFlags{ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CallbackEdit },
     editViewCallback{},
@@ -38,18 +43,50 @@ YamlEditView::Impl::Impl() :
     editViewCallback = [](ImGuiInputTextCallbackData* data) ->int
     {
         //TODO put implementation here
-        std::stringstream ss{data->Buf};
-        static_cast<YamlEditView::Impl*>(data->UserData)->yamlTextBuffer = ss.str();
-        YAML::Parser yamlParser;
-        yamlParser.Load(ss);
-        yamlParser.PrintTokens(std::cout);
+        
         return 0;
     };
 
 }
 
-YamlEditView::YamlEditView() : 
-    p {std::make_unique<Impl>()}
+void YamlEditView::Impl::traverseYamlNode(const YAML::Node& yamlNode)
+{
+    auto nodeType = yamlNode.Type();
+    if(nodeType == YAML::NodeType::Undefined)
+    {
+        std::cout << "NodeType::Undefined" << std::endl;
+    }
+    if(nodeType ==  YAML::NodeType::Null)
+    {
+        std::cout << "NodeType::Null" << std::endl;
+    }
+    if(nodeType == YAML::NodeType::Scalar)
+    {
+        std::cout << yamlNode.as<std::string>() << std::endl;
+    }
+    if(nodeType == YAML::NodeType::Sequence)
+    {
+        for (YAML::const_iterator it=yamlNode.begin();it!=yamlNode.end();++it) 
+        {
+            traverseYamlNode(*it);
+        }
+    }
+    if(nodeType == YAML::NodeType::Map)
+    {
+        for(YAML::const_iterator it=yamlNode.begin();it != yamlNode.end();++it) 
+        {
+            std::string key = it->first.as<std::string>();
+            std::cout << key << std::endl;
+            if(it->second.IsDefined())
+            {
+                traverseYamlNode(it->second);
+            }
+        }
+    }
+}
+
+YamlEditView::YamlEditView(unsigned short width, unsigned short height) : 
+    p {std::make_unique<Impl>(width, height)}
 {
 
 }
@@ -66,6 +103,14 @@ void YamlEditView::show()
     else
     {
         ImGui::InputTextMultiline("##source", &p->yamlTextBuffer, ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 32), p->inputTextFlags, p->editViewCallback, p->callBackContextData.get());
+        auto clicked = ImGui::Button("Validate");
+        if(clicked)
+        {
+            std::cout << "Button clicked" << std::endl;
+            std::stringstream ss{p->yamlTextBuffer};
+            YAML::Node yamlNode = YAML::Load(ss);
+            p->traverseYamlNode(std::move(yamlNode));
+        }
         ImGui::End();
     }
 }

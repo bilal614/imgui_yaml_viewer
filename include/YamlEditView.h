@@ -8,7 +8,7 @@ namespace YamlViewer
 class YamlEditView : public IYamlEditView
 {
 public:
-    YamlEditView();
+    YamlEditView(unsigned short width, unsigned short height);
     ~YamlEditView();
     void show();
 private:
