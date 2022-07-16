@@ -4,11 +4,12 @@
 
 namespace YamlViewer
 {
+class YamlViewModel;
 
 class YamlEditView : public IYamlEditView
 {
 public:
-    YamlEditView(unsigned short width, unsigned short height);
+    YamlEditView(YamlViewModel& yamlViewModel, unsigned short width, unsigned short height);
     ~YamlEditView();
     void show();
 private:

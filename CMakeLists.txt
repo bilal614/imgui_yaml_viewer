@@ -60,9 +60,12 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         -pthread 
     )
 
-    add_executable(simple_image_viewer 
+    add_executable(simple_image_viewer
+        ${PROJECT_SOURCE_DIR}/src/ErrorView.cpp
         ${PROJECT_SOURCE_DIR}/src/GlfwBackendBinding.cpp
         ${PROJECT_SOURCE_DIR}/src/YamlEditView.cpp
+        ${PROJECT_SOURCE_DIR}/src/YamlValidationModel.cpp
+        ${PROJECT_SOURCE_DIR}/src/YamlViewModel.cpp
         ${PROJECT_SOURCE_DIR}/src/main.cpp
     )
 

@@ -1,6 +1,9 @@
 
 #include "GlfwBackendBinding.h"
+
+#include "ErrorView.h"
 #include "YamlEditView.h"
+#include "YamlViewModel.h"
 
 #include <iostream>
 #include <string>
@@ -28,7 +31,9 @@ struct GlfwBackendBinding::Impl
     ~Impl();
     std::string glShaderLanguageVersion;
     GLFWwindow* window;
+    std::unique_ptr<ErrorView> errorView;
     std::unique_ptr<YamlEditView> yamlEditView;
+    std::unique_ptr<YamlViewModel> yamlViewModel;
 };
 
 GlfwBackendBinding::Impl::~Impl()
@@ -44,7 +49,9 @@ GlfwBackendBinding::Impl::~Impl()
 
 GlfwBackendBinding::Impl::Impl() :
     glShaderLanguageVersion{"#version 130"},
-    yamlEditView{ }
+    yamlEditView{ },
+    errorView{ std::make_unique<ErrorView>()},
+    yamlViewModel{std::make_unique<YamlViewModel>(*errorView.get())}
 {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -82,8 +89,7 @@ GlfwBackendBinding::Impl::Impl() :
         ImGui_ImplOpenGL3_Init(glShaderLanguageVersion.c_str());
     }
 
-    yamlEditView = std::make_unique<YamlEditView>(screenWidth, screenHeight);
-
+    yamlEditView = std::make_unique<YamlEditView>(*yamlViewModel.get(), screenWidth, screenHeight);
 }
 
 GlfwBackendBinding::GlfwBackendBinding() : p{std::make_unique<Impl>()}
@@ -115,10 +121,7 @@ void GlfwBackendBinding::runMainLoop()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        {
-            p->yamlEditView->show();
-        }
-
+        p->yamlEditView->show();
 
         // Rendering
         ImGui::Render();
