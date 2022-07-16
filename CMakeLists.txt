@@ -60,7 +60,7 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         -pthread 
     )
 
-    add_executable(simple_image_viewer
+    add_executable(yaml_validation_tool
         ${PROJECT_SOURCE_DIR}/src/ErrorView.cpp
         ${PROJECT_SOURCE_DIR}/src/GlfwBackendBinding.cpp
         ${PROJECT_SOURCE_DIR}/src/YamlEditView.cpp
@@ -69,14 +69,14 @@ if(OPENGL_FOUND AND PKG_CONFIG_FOUND AND GLFW3_FOUND)
         ${PROJECT_SOURCE_DIR}/src/main.cpp
     )
 
-    target_include_directories(simple_image_viewer PUBLIC
+    target_include_directories(yaml_validation_tool PUBLIC
         ${PROJECT_SOURCE_DIR}/include 
         ${PROJECT_SOURCE_DIR}/imgui
         ${PROJECT_SOURCE_DIR}/imgui/backends
         $<TARGET_PROPERTY:yaml-cpp,INCLUDE_DIRECTORIES>
     )
 
-    target_link_libraries(simple_image_viewer
+    target_link_libraries(yaml_validation_tool
         imgui_glfw_opengl
         ${OPENGL_LIBRARIES}
         ${GLFW3_LIBRARIES}
